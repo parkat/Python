@@ -1,3 +1,5 @@
+#TODO: make it so that the keys only trigger one event when pressed and not multiple
+
 import pygame
 from pygame.locals import *
 import random
