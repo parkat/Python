@@ -1,57 +1,41 @@
-import matplotlib.pyplot as plt
 import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.animation import FuncAnimation
+import matplotlib.cm as cm
+from pynput.mouse import Listener
 
-data = [
-    [13, 36],
-    [13, 35],
-    [5.5, 18],
-    [2.7, 8],
-    [4.3, 15],
-    [12, 25],
-    [3.1, 13],
-    [6.2, 19],
-    [8.8, 26],
-    [6.2, 17],
-    [8.8, 45],
-    [2.7, 12],
-    [4, 15],
-    [3.3, 12],
-    [4.8, 12],
-    [4.6, 18],
-    [0.5, 7],
-    [9.1, 30],
-    [6, 16],
-    [5.8, 19]
-]
+xpoints = np.array([.5, 2.3, 2.9])
+ypoints = np.array([1.4, 1.9, 3.2])
 
-data_test = [
-    [9, 26],
-    [6.25, 17],
-    [0.4, 10],
-    [2.3, 7],
-    [11, 22],
-    [8.645, 21],
-    [4.52, 34],
-    [7, 23]
-]
+m = .64
+b = 0
+print("y-int = " + str(b))
+learnRate = .1
+epochCount = 0
 
-xpoints = np.array([row[0] for row in data])
-ypoints = np.array([row[1] for row in data])
+fig, ax = plt.subplots()
+ax.scatter(xpoints, ypoints, color='red', label='Data Points')
 
-test_xpoints = np.array([row[0] for row in data_test])
-test_ypoints = np.array([row[1] for row in data_test])
+colors = cm.rainbow(np.linspace(0, 1, 100))
 
-plt.scatter(test_xpoints, test_ypoints, color="blue", marker="+", s=30)
-plt.scatter(xpoints, ypoints, color="black", marker="o", s=30)
-m_x = np.mean(xpoints)
-m_y = np.mean(ypoints)
+def update(i):
+    global m, b
+    y_pred = m * xpoints + b
+    error = ypoints - y_pred
+    gradient_m = (-2 / len(xpoints)) * sum(xpoints * error)
+    gradient_b = (-2 / len(xpoints)) * sum(error)
+    m -= learnRate * gradient_m
+    b -= learnRate * gradient_b
+    ax.plot(xpoints, m * xpoints + b, color=colors[i])
+    print(f"slope= {m}\nY-intercept= {b}")
 
-num = sum((x_i - m_x) * (y_i - m_y) for x_i, y_i in zip(xpoints, ypoints))
-den = sum((x_i - m_x) ** 2 for x_i in xpoints)
-m = num / den
-b = m_y - m * m_x
 
-print(f"slope = {m} \nY intercept = {b}")
-plt.axline((m_x,m_y),slope= m, color = "red", linestyle= "--")
 
-plt.show()
+
+
+#ani = FuncAnimation(fig, update, frames=range(100), repeat=False)
+
+plt.xlabel('X')
+plt.ylabel('Y')
+plt.legend()
+
