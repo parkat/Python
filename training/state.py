@@ -3,7 +3,7 @@ import random
 import numpy as np
 
 from configs import Configs
-
+from tqdm import tqdm
 
 class State():
     def __init__(self, p1):
@@ -125,7 +125,7 @@ class State():
             return False
         elif self.mines[action[0]][action[1]] == 1:
             self.isEnd = True
-            print('Game Over')
+           # print('Game Over')
             return True
         else:
             if self.nums[action[0]][action[1]] != 0:
@@ -202,26 +202,32 @@ class State():
 
         elif result == -1:
             print('t')
-            self.p1.feedReward(0)
+            self.p1.feedReward(-1)
             #self.p1.feedReward(self.score/-10000)
             #self.score=0
 
     # play 2 humans
     def playGame(self, rounds=100):
         print("Initialize training for {} epochs".format(rounds))
-        for i in range(rounds):
-            if i % 1000 == 0:
-                print('Rounds {}'.format(i))
+
+        for i in tqdm(range(rounds),
+                      desc="Loading…",
+                      ascii=False, ncols=75):
+
+           # if i % 1000 == 0:
+            #    print('Rounds {}'.format(i))
+
+            LosslessMoves = 0
 
             while not self.isEnd:
                 # player 1
                 positions = self.getAvailablePositions()
                 p1_action = self.p1.chooseAction(positions, self.board, self.playerSymbol)
-                print(p1_action)
+               # print(p1_action)
                 if (self.updateStates(p1_action)):
                     #self.p1.feedReward(self.score/-10000)
                     self.p1.feedReward(0)
-                    print('u lostsds')
+                  #  print('u lostsds')
                     self.p1.reset()
                     self.reset()
                     break
@@ -234,17 +240,18 @@ class State():
                 winner = self.winner()
                 #print('hi')
                 if winner is not None:
-                    print('wte')
+                #    print('wte')
                     self.giveReward()
                     self.p1.reset()
                     self.reset()
                     break
+                if self.board[p1_action[0]][p1_action[1]] == -1 and self.mines[p1_action[0]][p1_action[1]] == 0:
+                    LosslessMoves += 1
+                    if LosslessMoves % 2 == 0:
+                        self.p1.feedReward(0.5)
+                        LosslessMoves = 0
+
 
 
         print("Done training... Saving 1 policies to {}".format(self.POLICIES_DIR))
         self.p1.savePolicy(self.POLICIES_DIR)
-
-
-
-
-
